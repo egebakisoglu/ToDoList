@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:todolist/pages/home_page.dart';
 
-void main() {
+void main() async {
+
+  await Hive.initFlutter();
+
+  await Hive.openBox('todolist');
+
   runApp(const MyApp());
 }
 

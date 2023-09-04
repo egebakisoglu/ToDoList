@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:todolist/data/database.dart';
 
 class ToDoMenuTile extends StatefulWidget {
   final String text;
   final List<String> waitingList;
   final List<String> completedList;
+  final ToDoListDatabase db;
 
   const ToDoMenuTile({super.key,
     required this.text,
     required this.waitingList,
     required this.completedList,
+    required this.db,
   });
 
   @override
@@ -56,6 +59,7 @@ class _ToDoMenuTileState extends State<ToDoMenuTile> {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
@@ -74,7 +78,17 @@ class _ToDoMenuTileState extends State<ToDoMenuTile> {
                     ),
                   ],
                 ),
-                const Icon(Icons.arrow_forward_ios_rounded),
+                const SizedBox(width: 20),
+                GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      widget.db.menuTilesList.removeWhere((tile) =>  tile.text == widget.text);
+                    });
+                    widget.db.updateData();
+                    print(widget.db.menuTilesList);
+                  },
+                  child: const Icon(Icons.delete_outline_rounded)
+                ),
               ],
             ),
           ),

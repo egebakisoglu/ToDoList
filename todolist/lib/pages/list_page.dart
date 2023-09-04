@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:todolist/data/database.dart';
 import 'package:todolist/menu_tile.dart';
+import 'package:todolist/pages/home_page.dart';
 import 'package:todolist/titles.dart';
 import 'package:todolist/to_do_list_tile.dart';
 
 class ListPage extends StatefulWidget {
   final ToDoMenuTile menuTile;
+  final ToDoListDatabase db;
 
-  const ListPage ({super.key, required this.menuTile});
+  const ListPage ({super.key, required this.menuTile, required this.db});
 
   @override
   State<ListPage> createState() => _ListPageState();
@@ -23,8 +26,12 @@ class _ListPageState extends State<ListPage> {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded),
           onPressed: () {
+            widget.db.updateData();
             setState(() {
-              Navigator.pop(context);
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => HomePage())
+              );
             });
           },
         ),
@@ -142,6 +149,7 @@ class _ListPageState extends State<ListPage> {
                         listTileController.text);
                       listTileController.text = "";
                     });
+                    widget.db.updateData();
                     Navigator.pop(context);
                   },
                   child: const Text(

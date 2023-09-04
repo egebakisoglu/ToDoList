@@ -1,18 +1,32 @@
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:todolist/data/database.dart';
 import 'package:todolist/pages/list_page.dart';
 import 'package:todolist/titles.dart';
 import 'package:todolist/menu_tile.dart';
 
 class HomePage extends StatefulWidget {
-  HomePage({super.key});
-  List<ToDoMenuTile> menuTilesList = [];
+  const HomePage({
+    super.key,
+  });
 
   @override
   State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
+  final todolistBox = Hive.box('todolist');
+  ToDoListDatabase db = ToDoListDatabase();
+
   TextEditingController menuTileController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    if (todolistBox.get('TODOLIST') != null){
+      db.loadData();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -22,6 +36,7 @@ class _HomePageState extends State<HomePage> {
       foregroundColor: Colors.black87,
       backgroundColor: Colors.grey[100],
       elevation: 2,
+      automaticallyImplyLeading: false,
       actions: [
         IconButton(
           padding: const EdgeInsets.only(right: 20),
@@ -38,12 +53,15 @@ class _HomePageState extends State<HomePage> {
       body: Column(
         children: [
           const HeadingText(text: "To-Do's"),
+          db.menuTilesList.length == 0
+          ? Center(
+            child: Text('Nothing to see here'),
+          ):
           Container(
-            height: 60.0 * widget.menuTilesList.length + 10,
+            height: 60.0 * db.menuTilesList.length + 10,
             padding: const EdgeInsets.only(top: 10),
             child: ListView.builder(
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: widget.menuTilesList.length,
+              itemCount: db.menuTilesList.length,
               itemBuilder: (BuildContext context, int index) {
                 return GestureDetector(
                   onTap: () {
@@ -52,13 +70,14 @@ class _HomePageState extends State<HomePage> {
                       MaterialPageRoute(
                         builder: (context) {
                           return ListPage(
-                            menuTile: widget.menuTilesList[index],
+                            db: db,
+                            menuTile: db.menuTilesList[index],
                           );
                         }
                       ),
                     );
                   },
-                  child: widget.menuTilesList[index],
+                  child: db.menuTilesList[index],
                 );
               },
             ),
@@ -106,15 +125,17 @@ class _HomePageState extends State<HomePage> {
                 TextButton(
                   onPressed: () {
                     setState(() {
-                      widget.menuTilesList.add(
+                      db.menuTilesList.add(
                         ToDoMenuTile(
                           text: menuTileController.text,
                           waitingList: [],
                           completedList: [],
+                          db: db,
                         ),
                       );
                       menuTileController.text = "";
                     });
+                    db.updateData();
                     Navigator.pop(context);
                   },
                   child: const Text(
